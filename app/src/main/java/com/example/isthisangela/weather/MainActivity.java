@@ -1,11 +1,16 @@
 package com.example.isthisangela.weather;
 
+import android.Manifest;
+import android.content.pm.PackageManager;
 import android.location.Address;
 import android.location.Geocoder;
 import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
 import android.net.Uri;
+import android.os.AsyncTask;
+import android.support.v4.app.ActivityCompat;
+import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
@@ -21,6 +26,7 @@ import java.io.File;
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.net.URLConnection;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -60,7 +66,7 @@ public class MainActivity extends AppCompatActivity implements LocationListener 
     ImageView iconView;
 
     //layout on weather page
-
+    //TODO: this
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -75,9 +81,23 @@ public class MainActivity extends AppCompatActivity implements LocationListener 
         rainView = findViewById(R.id.rain);
         iconView = findViewById(R.id.icon);
 
-        getLocation();
-        setInfo();
-        setView();
+        if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION)
+                == PackageManager.PERMISSION_GRANTED) {
+            try {
+                getLocation();
+                URL url = new URL(API_URL + latitude + "," + longitude);
+                ProcessJSON p = new ProcessJSON();
+                p.execute(url);
+                setView();
+            } catch (Exception e) {
+                Toast.makeText(MainActivity.this, "Big big error", Toast.LENGTH_SHORT).show();
+            }
+        } else {
+            ActivityCompat.requestPermissions(this,
+                    new String[]{Manifest.permission.ACCESS_FINE_LOCATION},
+                    1);
+            Toast.makeText(MainActivity.this, "Please enable GPS and internet", Toast.LENGTH_SHORT).show();
+        }
     }
 
     void getLocation() {
@@ -85,6 +105,7 @@ public class MainActivity extends AppCompatActivity implements LocationListener 
             locationManager = (LocationManager) getSystemService(LOCATION_SERVICE);
             assert locationManager != null;
             locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, FREQUENCY, DISTANCE, this);
+            onLocationChanged(locationManager.getLastKnownLocation(LocationManager.GPS_PROVIDER));
         }
         catch(SecurityException e) {
             e.printStackTrace();
@@ -103,57 +124,66 @@ public class MainActivity extends AppCompatActivity implements LocationListener 
         return city;
     }
 
-    private void setInfo() {
-        try {
-
-            //get json
-            URL url = new URL(API_URL + latitude + "," + longitude);
-            HttpURLConnection urlConnection = (HttpURLConnection) url.openConnection();
-            BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(urlConnection.getInputStream()));
-            StringBuilder stringBuilder = new StringBuilder();
-            String line;
-            while ((line = bufferedReader.readLine()) != null) {
-                stringBuilder.append(line).append("\n");
+    private class ProcessJSON extends AsyncTask<URL, Void, String> {
+        @Override
+        protected String doInBackground(URL... urls){
+            String result = "";
+            try {
+                URLConnection urlConn = urls[0].openConnection();
+                Log.d("hi", "hello");
+                BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(urlConn.getInputStream()));
+                Log.d("hello", "hi");
+                StringBuffer stringBuffer = new StringBuffer();
+                String line;
+                while ((line = bufferedReader.readLine()) != null) {
+                    stringBuffer.append(line.toString());
+                }
+                result =  stringBuffer.toString();
+                Log.d("string", result);
+            } catch (Exception e) {
+                Log.e("ProcessJSON", "error");
+                Toast.makeText(MainActivity.this, "Error retrieving weather", Toast.LENGTH_SHORT).show();
             }
-            bufferedReader.close();
-            urlConnection.disconnect();
+            return result;
+        }
 
-            //make into json objects
-            String jsonString = stringBuilder.toString();
-            JSONObject weather = (JSONObject) new JSONTokener(jsonString).nextValue();
-            JSONObject currently = weather.getJSONObject("currently");
-            //week's json, plus filling in array of months & dates
-            ArrayList<JSONObject> week = new ArrayList<JSONObject>();
-            Calendar temp = Calendar.getInstance();
-            for (int i = 0; i <= 7; i++) {
-                week.add((JSONObject) weather.getJSONObject("daily").getJSONArray("data").get(i));
-                temp.add(Calendar.DATE, 1);
-                Date nextDate = temp.getTime();
-                months.add(monthDF.format(nextDate));
-                dates.add(dayDF.format(nextDate));
+        protected void onPostExecute(String result) {
+            try {
+                //make into json objects
+                JSONObject weather = new JSONObject(result);
+                JSONObject currently = weather.getJSONObject("currently");
+                //week's json, plus filling in array of months & dates
+                ArrayList<JSONObject> week = new ArrayList<JSONObject>();
+                Calendar temp = Calendar.getInstance();
+                for (int i = 0; i <= 7; i++) {
+                    week.add((JSONObject) weather.getJSONObject("daily").getJSONArray("data").get(i));
+                    temp.add(Calendar.DATE, 1);
+                    Date nextDate = temp.getTime();
+                    months.add(monthDF.format(nextDate));
+                    dates.add(dayDF.format(nextDate));
+                }
+                JSONObject today = week.get(0);
+
+                //info rn
+                city = getCity();
+                icon = currently.getString("icon").replace("-", "_");
+                summary = currently.getString("summary");
+                tempNow = (int) currently.getDouble("temperature");
+                tempHigh = (int) today.getDouble("temperatureHigh");
+                tempLow = (int) today.getDouble("temperatureLow");
+                rain = today.getString("summary");
+
+                //info for week
+                for (JSONObject day : week) {
+                    icons.add(day.getString("icon").replace("-", "_"));
+                    summaries.add(day.getString("summary"));
+                    tempHighs.add((int) day.getDouble("temperatureHigh"));
+                    tempLows.add((int) day.getDouble("temperatureLow"));
+                }
+            } catch (Exception e) {
+                Log.e("ohhhh", "fuck");
+                Toast.makeText(MainActivity.this, "Error processing weather :(", Toast.LENGTH_SHORT).show();
             }
-            JSONObject today = week.get(0);
-
-            //info rn
-            city = getCity();
-            icon = currently.getString("icon").replace("-", "_");
-            summary = currently.getString("summary");
-            tempNow = (int) currently.getDouble("temperature");
-            tempHigh = (int) today.getDouble("temperatureHigh");
-            tempLow = (int) today.getDouble("temperatureLow");
-            rain = today.getString("summary");
-
-            //info for week
-            for (JSONObject day : week) {
-                icons.add(day.getString("icon").replace("-", "_"));
-                summaries.add(day.getString("summary"));
-                tempHighs.add((int) day.getDouble("temperatureHigh"));
-                tempLows.add((int) day.getDouble("temperatureLow"));
-            }
-
-        } catch (Exception e) {
-            Log.e("setToday", "error");
-            Toast.makeText(MainActivity.this, "Error getting today's weather :(", Toast.LENGTH_SHORT).show();
         }
     }
 
