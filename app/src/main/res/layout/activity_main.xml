@@ -6,13 +6,158 @@
     android:layout_height="match_parent"
     tools:context="com.example.isthisangela.weather.MainActivity">
 
+    <ImageView
+        android:id="@+id/icon"
+        android:layout_width="110dp"
+        android:layout_height="114dp"
+        android:layout_marginStart="48dp"
+        android:layout_marginTop="8dp"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/city"
+        app:srcCompat="@mipmap/ic_launcher" />
+
     <TextView
+        android:id="@+id/city"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Hello World!"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintLeft_toLeftOf="parent"
-        app:layout_constraintRight_toRightOf="parent"
+        android:layout_marginStart="48dp"
+        android:layout_marginTop="56dp"
+        android:fontFamily="monospace"
+        android:text="City name"
+        android:textColor="@android:color/darker_gray"
+        android:textSize="36sp"
+        app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
+
+    <TextView
+        android:id="@+id/tempNow"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="16dp"
+        android:fontFamily="monospace"
+        android:text="75"
+        android:textAllCaps="false"
+        android:textSize="80dp"
+        app:layout_constraintStart_toEndOf="@+id/icon"
+        app:layout_constraintTop_toBottomOf="@+id/city" />
+
+    <TextView
+        android:id="@+id/tempLow"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="8dp"
+        android:fontFamily="monospace"
+        android:text="60"
+        android:textColor="@color/cold"
+        android:textSize="18sp"
+        app:layout_constraintBottom_toBottomOf="@+id/icon"
+        app:layout_constraintStart_toStartOf="@+id/tempNow" />
+
+    <TextView
+        android:id="@+id/tempHigh"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="8dp"
+        android:fontFamily="monospace"
+        android:text="90"
+        android:textColor="@color/hot"
+        android:textSize="18sp"
+        app:layout_constraintBottom_toBottomOf="@+id/textView3"
+        app:layout_constraintStart_toEndOf="@+id/textView3" />
+
+    <TextView
+        android:id="@+id/summary"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="48dp"
+        android:layout_marginTop="8dp"
+        android:fontFamily="sans-serif"
+        android:text="(weather now)"
+        android:textSize="18sp"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/textView5" />
+
+    <TextView
+        android:id="@+id/rain"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="48dp"
+        android:layout_marginTop="8dp"
+        android:fontFamily="sans-serif"
+        android:text="(weather today)"
+        android:textSize="18sp"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/textView6" />
+
+    <TextView
+        android:id="@+id/textView1"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="20dp"
+        android:fontFamily="monospace"
+        android:text="°F"
+        android:textSize="18dp"
+        app:layout_constraintBottom_toBottomOf="@+id/tempNow"
+        app:layout_constraintStart_toEndOf="@+id/tempNow" />
+
+    <TextView
+        android:id="@+id/textView2"
+        android:layout_width="12dp"
+        android:layout_height="wrap_content"
+        android:fontFamily="monospace"
+        android:text="°"
+        android:textColor="@color/cold"
+        android:textSize="18sp"
+        app:layout_constraintBottom_toBottomOf="@+id/tempLow"
+        app:layout_constraintStart_toEndOf="@+id/tempLow" />
+
+    <TextView
+        android:id="@+id/textView3"
+        android:layout_width="12dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="8dp"
+        android:fontFamily="monospace"
+        android:text="/"
+        android:textColor="?attr/colorButtonNormal"
+        android:textSize="18sp"
+        app:layout_constraintBottom_toBottomOf="@+id/textView2"
+        app:layout_constraintStart_toEndOf="@+id/textView2" />
+
+    <TextView
+        android:id="@+id/textView4"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:fontFamily="monospace"
+        android:text="°"
+        android:textColor="@color/hot"
+        android:textSize="18sp"
+        app:layout_constraintBottom_toBottomOf="@+id/tempHigh"
+        app:layout_constraintStart_toEndOf="@+id/tempHigh" />
+
+    <TextView
+        android:id="@+id/textView5"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="48dp"
+        android:layout_marginTop="32dp"
+        android:fontFamily="monospace"
+        android:text="Right now"
+        android:textSize="22sp"
+        android:textStyle="bold"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/icon" />
+
+    <TextView
+        android:id="@+id/textView6"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="48dp"
+        android:layout_marginTop="24dp"
+        android:fontFamily="monospace"
+        android:text="Today"
+        android:textSize="22sp"
+        android:textStyle="bold"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/summary" />
 
 </android.support.constraint.ConstraintLayout>
